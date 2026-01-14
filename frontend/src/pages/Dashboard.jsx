@@ -109,7 +109,7 @@ const Dashboard = () => {
       <header className="border-b border-border bg-background">
         <div className="container mx-auto px-8 py-6 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground">PMS Form Studio</h1>
+            <h1 className="text-4xl font-semibold tracking-tight text-foreground">Form Studio</h1>
             <p className="text-sm text-muted-foreground mt-1 font-medium uppercase tracking-wider">Template Management</p>
           </div>
           <div className="flex gap-3">
