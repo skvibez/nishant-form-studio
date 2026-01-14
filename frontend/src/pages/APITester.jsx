@@ -58,7 +58,7 @@ const APITester = () => {
     }
 
     const payload = {};
-    const comments = [];
+    const fieldComments = {};
 
     fields.forEach(field => {
       const keys = field.key.split('.');
@@ -75,91 +75,86 @@ const APITester = () => {
       
       // Generate sample value based on type
       let sampleValue = '';
-      let comment = '';
+      let commentParts = [`Type: ${field.type}`];
       
       switch (field.type) {
         case 'TEXT':
         case 'TEXTAREA':
           sampleValue = 'Sample Text';
-          comment = `// Type: ${field.type}`;
           break;
         case 'EMAIL':
           sampleValue = 'user@example.com';
-          comment = `// Type: EMAIL`;
           break;
         case 'PHONE':
           sampleValue = '+1234567890';
-          comment = `// Type: PHONE`;
           break;
         case 'NUMBER':
           sampleValue = 123;
-          comment = `// Type: NUMBER`;
           break;
         case 'CHECKBOX':
         case 'RADIO':
           sampleValue = true;
-          comment = `// Type: ${field.type}, Values: true/false`;
+          commentParts.push('Values: true/false');
           break;
         case 'DATE':
           sampleValue = '2025-01-14';
-          comment = `// Type: DATE, Format: YYYY-MM-DD`;
+          commentParts.push('Format: YYYY-MM-DD');
           break;
         default:
           sampleValue = 'Sample';
-          comment = `// Type: ${field.type}`;
       }
       
-      // Add validation info
+      // Add validation info to comments
       if (field.validation) {
         if (field.validation.required) {
-          comment += ', REQUIRED';
+          commentParts.push('REQUIRED');
         }
         if (field.validation.regex) {
-          comment += `, Pattern: ${field.validation.regex}`;
+          commentParts.push(`Pattern: ${field.validation.regex}`);
         }
         if (field.validation.maxLen) {
-          comment += `, MaxLength: ${field.validation.maxLen}`;
+          commentParts.push(`MaxLen: ${field.validation.maxLen}`);
         }
       }
       
       current[lastKey] = sampleValue;
-      comments.push(`"${field.key}": ${comment}`);
+      fieldComments[field.key] = `// ${commentParts.join(', ')}`;
     });
 
-    // Format with comments
-    const jsonStr = JSON.stringify(payload, null, 2);
-    const lines = jsonStr.split('\n');
-    const withComments = [];
-    
-    lines.forEach(line => {
-      withComments.push(line);
-      // Find matching comment for this line
-      const match = line.match(/"([^"]+)":/);
+    // Format JSON with inline comments
+    const jsonLines = JSON.stringify(payload, null, 2).split('\n');
+    const withComments = jsonLines.map(line => {
+      // Match property keys in JSON
+      const match = line.match(/^\s*"([^"]+)":/);
       if (match) {
-        const fullKey = findFullKey(payload, match[1], '');
-        const comment = comments.find(c => c.startsWith(`"${fullKey}":`));
-        if (comment) {
-          const commentText = comment.split(': ')[1];
-          withComments[withComments.length - 1] = line + '  ' + commentText;
+        const key = match[1];
+        // Find the full path for nested keys
+        const fullKey = findKeyInObject(payload, key);
+        if (fullKey && fieldComments[fullKey]) {
+          // Remove trailing comma if exists, add comment, then add comma back
+          const hasComma = line.trim().endsWith(',');
+          const lineWithoutComma = hasComma ? line.slice(0, -1) : line;
+          return `${lineWithoutComma}  ${fieldComments[fullKey]}${hasComma ? ',' : ''}`;
         }
       }
+      return line;
     });
     
     setPayload(withComments.join('\n'));
   };
 
-  const findFullKey = (obj, searchKey, prefix) => {
+  const findKeyInObject = (obj, searchKey, prefix = '') => {
     for (const key in obj) {
       const fullKey = prefix ? `${prefix}.${key}` : key;
       if (key === searchKey) {
         return fullKey;
       }
       if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
-        const found = findFullKey(obj[key], searchKey, fullKey);
+        const found = findKeyInObject(obj[key], searchKey, fullKey);
         if (found) return found;
       }
     }
-    return '';
+    return null;
   };
 
   const handleTemplateChange = async (templateKey) => {
