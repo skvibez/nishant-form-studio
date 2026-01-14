@@ -44,6 +44,10 @@ async function generatePDF(baseFileUrl, fieldSchema, payload, options = {}) {
 
       switch (field.type) {
         case 'TEXT':
+        case 'TEXTAREA':
+        case 'NUMBER':
+        case 'EMAIL':
+        case 'PHONE':
           const text = String(value);
           
           // Auto-shrink if text is too wide
@@ -71,9 +75,9 @@ async function generatePDF(baseFileUrl, fieldSchema, payload, options = {}) {
           break;
 
         case 'CHECKBOX':
+        case 'RADIO':
           if (value === true || value === 'true' || value === 1) {
-            // Use 'X' instead of checkmark for WinAnsi compatibility
-            const tickChar = field.style.tickChar === '✓' ? 'X' : (field.style.tickChar || 'X');
+            const tickChar = field.style.tickChar || '\u2713';
             const tickSize = Math.min(w, h) * 0.7;
             page.drawText(tickChar, {
               x: x + (w - font.widthOfTextAtSize(tickChar, tickSize)) / 2,
@@ -96,6 +100,7 @@ async function generatePDF(baseFileUrl, fieldSchema, payload, options = {}) {
           });
           break;
 
+        case 'SIGNATURE':
         case 'SIGNATURE_ANCHOR':
           // Draw transparent anchor text for e-sign services
           page.drawText(`\\s${field.id}\\`, {
