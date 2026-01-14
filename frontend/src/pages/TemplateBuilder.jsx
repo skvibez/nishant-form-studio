@@ -5,44 +5,111 @@ import { API } from '../App';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { DndContext, useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { Resizable } from 'react-resizable-box';
 import { Button } from '../components/ui/button';
-import { Card } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Switch } from '../components/ui/switch';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Eye, Plus, Trash2 } from 'lucide-react';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import 'react-resizable-box/dist/index.css';
 
 // Configure PDF.js worker from jsdelivr CDN (more reliable)
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-// Draggable Field Component
-const DraggableField = ({ field, isSelected, onClick, canvasScale }) => {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+// Draggable & Resizable Field Component
+const DraggableResizableField = ({ field, isSelected, onClick, onUpdate, canvasScale, showPreview, previewValues }) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: field.id,
+    disabled: false
   });
 
+  const [size, setSize] = useState({ width: field.rect.w * canvasScale, height: field.rect.h * canvasScale });
+
+  const handleResizeStop = (e, direction, ref, delta) => {
+    const newWidth = (size.width + delta.width) / canvasScale;
+    const newHeight = (size.height + delta.height) / canvasScale;
+    onUpdate(field.id, { rect: { ...field.rect, w: newWidth, h: newHeight } });
+    setSize({ width: size.width + delta.width, height: size.height + delta.height });
+  };
+
+  // Get preview content
+  const getPreviewContent = () => {
+    if (!showPreview || !previewValues) return field.key;
+    
+    const keys = field.key.split('.');
+    let value = previewValues;
+    for (const key of keys) {
+      if (value && typeof value === 'object') {
+        value = value[key];
+      } else {
+        return field.key;
+      }
+    }
+    
+    if (field.type === 'CHECKBOX' || field.type === 'RADIO') {
+      return value ? '✓' : '';
+    }
+    
+    return value || field.key;
+  };
+
   const style = {
-    width: `${field.rect.w * canvasScale}px`,
-    height: `${field.rect.h * canvasScale}px`,
-    transform: CSS.Transform.toString(transform),
     position: 'absolute',
     left: `${field.rect.x * canvasScale}px`,
     top: `${field.rect.y * canvasScale}px`,
+    transform: CSS.Transform.toString(transform),
     border: isSelected ? '2px solid hsl(212 100% 48%)' : '2px dashed hsl(240 3.8% 46.1%)',
     backgroundColor: 'rgba(212, 212, 255, 0.1)',
-    cursor: 'move',
+    cursor: isDragging ? 'grabbing' : 'grab',
     touchAction: 'none',
+    zIndex: isSelected ? 10 : 1,
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes} onClick={onClick}>
-      <div className="text-xs font-mono px-1 bg-white/90 truncate" style={{ fontSize: '10px' }}>
-        {field.key}
+    <Resizable
+      width={size.width}
+      height={size.height}
+      onResizeStop={handleResizeStop}
+      enable={{
+        top: false,
+        right: isSelected,
+        bottom: isSelected,
+        left: false,
+        topRight: false,
+        bottomRight: isSelected,
+        bottomLeft: false,
+        topLeft: false
+      }}
+      handleStyles={{
+        right: { backgroundColor: 'hsl(212 100% 48%)', width: '4px', right: '0' },
+        bottom: { backgroundColor: 'hsl(212 100% 48%)', height: '4px', bottom: '0' },
+        bottomRight: { backgroundColor: 'hsl(212 100% 48%)', width: '8px', height: '8px', right: '0', bottom: '0' }
+      }}
+    >
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...listeners}
+        {...attributes}
+        onClick={onClick}
+        className="w-full h-full flex items-center justify-start px-1"
+      >
+        <div 
+          className="text-xs font-mono truncate"
+          style={{ 
+            fontSize: `${Math.min(field.style.fontSize * canvasScale * 0.8, 12)}px`,
+            color: showPreview ? field.style.color : '#666',
+            fontWeight: showPreview ? 'normal' : '500'
+          }}
+        >
+          {getPreviewContent()}
+        </div>
       </div>
-    </div>
+    </Resizable>
   );
 };
 
@@ -57,6 +124,8 @@ const TemplateBuilder = () => {
   const [selectedField, setSelectedField] = useState(null);
   const [pdfDimensions, setPdfDimensions] = useState({ width: 595.28, height: 841.89 });
   const [canvasScale, setCanvasScale] = useState(1);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewValues, setPreviewValues] = useState({});
   const pageRef = useRef(null);
 
   useEffect(() => {
@@ -73,9 +142,45 @@ const TemplateBuilder = () => {
       setVersion(versionRes.data);
       setPdfDimensions(versionRes.data.dimensions);
       setFields(versionRes.data.field_schema || []);
+      generatePreviewValues(versionRes.data.field_schema || []);
     } catch (error) {
       toast.error('Failed to load template data');
     }
+  };
+
+  const generatePreviewValues = (fieldSchema) => {
+    const values = {};
+    fieldSchema.forEach(field => {
+      const keys = field.key.split('.');
+      let current = values;
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) current[keys[i]] = {};
+        current = current[keys[i]];
+      }
+      
+      const lastKey = keys[keys.length - 1];
+      switch (field.type) {
+        case 'EMAIL':
+          current[lastKey] = 'user@example.com';
+          break;
+        case 'PHONE':
+          current[lastKey] = '+1234567890';
+          break;
+        case 'NUMBER':
+          current[lastKey] = '123';
+          break;
+        case 'CHECKBOX':
+        case 'RADIO':
+          current[lastKey] = true;
+          break;
+        case 'DATE':
+          current[lastKey] = '14-01-2025';
+          break;
+        default:
+          current[lastKey] = 'Sample Text';
+      }
+    });
+    setPreviewValues(values);
   };
 
   const onDocumentLoadSuccess = ({ numPages }) => {
@@ -102,8 +207,8 @@ const TemplateBuilder = () => {
       rect: {
         x: 100,
         y: 100,
-        w: 150,
-        h: 30
+        w: type === 'CHECKBOX' || type === 'RADIO' ? 30 : 150,
+        h: type === 'TEXTAREA' ? 60 : 30
       },
       style: {
         fontFamily: 'Helvetica',
@@ -123,49 +228,37 @@ const TemplateBuilder = () => {
     setSelectedField(newField);
   };
 
-  const updateFieldPosition = (fieldId, delta) => {
-    const field = fields.find(f => f.id === fieldId);
-    if (!field) return;
-
-    // Convert delta to PDF points
-    const xPt = field.rect.x + (delta.x / canvasScale);
-    const yPt = field.rect.y + (delta.y / canvasScale);
-
-    setFields(fields.map(f => 
-      f.id === fieldId 
-        ? { ...f, rect: { ...f.rect, x: xPt, y: yPt } }
-        : f
-    ));
+  const updateField = (fieldId, updates) => {
+    setFields(fields.map(f => f.id === fieldId ? { ...f, ...updates } : f));
+    if (selectedField?.id === fieldId) {
+      setSelectedField({ ...selectedField, ...updates });
+    }
   };
 
   const handleDragEnd = (event) => {
     const { active, delta } = event;
     if (delta.x !== 0 || delta.y !== 0) {
-      updateFieldPosition(active.id, delta);
+      const field = fields.find(f => f.id === active.id);
+      if (field) {
+        const xPt = field.rect.x + (delta.x / canvasScale);
+        const yPt = field.rect.y + (delta.y / canvasScale);
+        updateField(active.id, { rect: { ...field.rect, x: xPt, y: yPt } });
+      }
     }
   };
 
   const updateFieldProperty = (property, value) => {
     if (!selectedField) return;
 
-    setFields(fields.map(f => {
-      if (f.id === selectedField.id) {
-        if (property.includes('.')) {
-          const [parent, child] = property.split('.');
-          return { ...f, [parent]: { ...f[parent], [child]: value } };
-        }
-        return { ...f, [property]: value };
-      }
-      return f;
-    }));
+    const updates = {};
+    if (property.includes('.')) {
+      const [parent, child] = property.split('.');
+      updates[parent] = { ...selectedField[parent], [child]: value };
+    } else {
+      updates[property] = value;
+    }
 
-    setSelectedField(prev => {
-      if (property.includes('.')) {
-        const [parent, child] = property.split('.');
-        return { ...prev, [parent]: { ...prev[parent], [child]: value } };
-      }
-      return { ...prev, [property]: value };
-    });
+    updateField(selectedField.id, updates);
   };
 
   const deleteField = (fieldId) => {
@@ -228,90 +321,33 @@ const TemplateBuilder = () => {
           <p className="text-sm text-muted-foreground mt-1 font-mono">v{version.version_number}</p>
         </div>
 
+        <div className="mb-6 p-3 bg-muted/50 rounded-md">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="preview-toggle" className="text-sm font-medium">Show Preview</Label>
+            <Switch
+              id="preview-toggle"
+              checked={showPreview}
+              onCheckedChange={setShowPreview}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5">Display sample values in fields</p>
+        </div>
+
         <div className="space-y-3">
           <Label className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Add Fields</Label>
           <div className="space-y-2">
-            <Button
-              data-testid="add-text-field"
-              onClick={() => addField('TEXT')}
-              variant="outline"
-              className="w-full justify-start font-medium"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Text Field
-            </Button>
-            <Button
-              data-testid="add-textarea-field"
-              onClick={() => addField('TEXTAREA')}
-              variant="outline"
-              className="w-full justify-start font-medium"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Text Area
-            </Button>
-            <Button
-              data-testid="add-number-field"
-              onClick={() => addField('NUMBER')}
-              variant="outline"
-              className="w-full justify-start font-medium"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Number
-            </Button>
-            <Button
-              data-testid="add-email-field"
-              onClick={() => addField('EMAIL')}
-              variant="outline"
-              className="w-full justify-start font-medium"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Email
-            </Button>
-            <Button
-              data-testid="add-phone-field"
-              onClick={() => addField('PHONE')}
-              variant="outline"
-              className="w-full justify-start font-medium"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Phone
-            </Button>
-            <Button
-              data-testid="add-checkbox-field"
-              onClick={() => addField('CHECKBOX')}
-              variant="outline"
-              className="w-full justify-start font-medium"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Checkbox
-            </Button>
-            <Button
-              data-testid="add-radio-field"
-              onClick={() => addField('RADIO')}
-              variant="outline"
-              className="w-full justify-start font-medium"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Radio Button
-            </Button>
-            <Button
-              data-testid="add-date-field"
-              onClick={() => addField('DATE')}
-              variant="outline"
-              className="w-full justify-start font-medium"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Date
-            </Button>
-            <Button
-              data-testid="add-signature-field"
-              onClick={() => addField('SIGNATURE')}
-              variant="outline"
-              className="w-full justify-start font-medium"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Signature
-            </Button>
+            {['TEXT', 'TEXTAREA', 'NUMBER', 'EMAIL', 'PHONE', 'CHECKBOX', 'RADIO', 'DATE', 'SIGNATURE'].map(type => (
+              <Button
+                key={type}
+                data-testid={`add-${type.toLowerCase()}-field`}
+                onClick={() => addField(type)}
+                variant="outline"
+                className="w-full justify-start font-medium text-xs"
+              >
+                <Plus className="h-3 w-3 mr-2" />
+                {type.charAt(0) + type.slice(1).toLowerCase().replace('_', ' ')}
+              </Button>
+            ))}
           </div>
         </div>
 
@@ -376,11 +412,14 @@ const TemplateBuilder = () => {
             <div className="absolute inset-0 pointer-events-none">
               {pageFields.map((field) => (
                 <div key={field.id} className="pointer-events-auto">
-                  <DraggableField
+                  <DraggableResizableField
                     field={field}
                     isSelected={selectedField?.id === field.id}
                     onClick={() => setSelectedField(field)}
+                    onUpdate={updateField}
                     canvasScale={canvasScale}
+                    showPreview={showPreview}
+                    previewValues={previewValues}
                   />
                 </div>
               ))}
