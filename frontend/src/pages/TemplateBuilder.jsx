@@ -56,46 +56,32 @@ const DraggableResizableField = ({ field, isSelected, onClick, onUpdate, canvasS
     return value || field.key;
   };
 
-  const style = {
-    position: 'absolute',
-    left: `${field.rect.x * canvasScale}px`,
-    top: `${field.rect.y * canvasScale}px`,
-    transform: CSS.Transform.toString(transform),
-    border: isSelected ? '2px solid hsl(212 100% 48%)' : '2px dashed hsl(240 3.8% 46.1%)',
-    backgroundColor: 'rgba(212, 212, 255, 0.1)',
-    cursor: isDragging ? 'grabbing' : 'grab',
-    touchAction: 'none',
-    zIndex: isSelected ? 10 : 1,
-  };
-
   return (
-    <Resizable
+    <ResizableBox
       width={size.width}
       height={size.height}
       onResizeStop={handleResizeStop}
-      enable={{
-        top: false,
-        right: isSelected,
-        bottom: isSelected,
-        left: false,
-        topRight: false,
-        bottomRight: isSelected,
-        bottomLeft: false,
-        topLeft: false
+      customStyle={{
+        position: 'absolute',
+        left: `${field.rect.x * canvasScale}px`,
+        top: `${field.rect.y * canvasScale}px`,
+        transform: CSS.Transform.toString(transform),
+        border: isSelected ? '2px solid hsl(212 100% 48%)' : '2px dashed hsl(240 3.8% 46.1%)',
+        backgroundColor: 'rgba(212, 212, 255, 0.1)',
+        cursor: isDragging ? 'grabbing' : 'grab',
+        touchAction: 'none',
+        zIndex: isSelected ? 10 : 1,
       }}
       handleStyles={{
-        right: { backgroundColor: 'hsl(212 100% 48%)', width: '4px', right: '0' },
-        bottom: { backgroundColor: 'hsl(212 100% 48%)', height: '4px', bottom: '0' },
-        bottomRight: { backgroundColor: 'hsl(212 100% 48%)', width: '8px', height: '8px', right: '0', bottom: '0' }
+        bottomRight: isSelected ? { display: 'block', width: '8px', height: '8px', backgroundColor: 'hsl(212 100% 48%)', right: '0', bottom: '0' } : { display: 'none' }
       }}
     >
       <div
         ref={setNodeRef}
-        style={style}
+        className="w-full h-full flex items-center justify-start px-1"
         {...listeners}
         {...attributes}
         onClick={onClick}
-        className="w-full h-full flex items-center justify-start px-1"
       >
         <div 
           className="text-xs font-mono truncate"
@@ -108,7 +94,7 @@ const DraggableResizableField = ({ field, isSelected, onClick, onUpdate, canvasS
           {getPreviewContent()}
         </div>
       </div>
-    </Resizable>
+    </ResizableBox>
   );
 };
 
