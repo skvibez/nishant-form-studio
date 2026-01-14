@@ -23,6 +23,8 @@ const Dashboard = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [pdfFile, setPdfFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
