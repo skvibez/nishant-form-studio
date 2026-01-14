@@ -1,0 +1,151 @@
+{
+  "identity": {
+    "name": "PMS Form Studio",
+    "persona": "The Digital Architect",
+    "aesthetic": "Apple-Industrial Minimalist",
+    "core_philosophy": "The interface should be as invisible as a sheet of glass over the document."
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+      "body": "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "weights": {
+      "light": 300,
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    },
+    "styles": {
+      "h1": "text-4xl font-semibold tracking-tight text-foreground",
+      "h2": "text-3xl font-medium tracking-tight text-foreground",
+      "h3": "text-2xl font-medium tracking-tight text-foreground",
+      "body": "text-base font-normal leading-relaxed text-muted-foreground",
+      "caption": "text-sm font-medium text-muted-foreground uppercase tracking-wider",
+      "code": "font-mono text-xs bg-muted px-1 py-0.5 rounded text-foreground"
+    }
+  },
+  "colors": {
+    "palette": {
+      "background": "0 0% 100%",
+      "foreground": "240 10% 3.9%",
+      "card": "0 0% 100%",
+      "card_foreground": "240 10% 3.9%",
+      "popover": "0 0% 100%",
+      "popover_foreground": "240 10% 3.9%",
+      "primary": "240 5.9% 10%",
+      "primary_foreground": "0 0% 98%",
+      "secondary": "240 4.8% 95.9%",
+      "secondary_foreground": "240 5.9% 10%",
+      "muted": "240 4.8% 95.9%",
+      "muted_foreground": "240 3.8% 46.1%",
+      "accent": "212 100% 48%",
+      "accent_foreground": "0 0% 98%",
+      "destructive": "0 84.2% 60.2%",
+      "destructive_foreground": "0 0% 98%",
+      "border": "240 5.9% 90%",
+      "input": "240 5.9% 90%",
+      "ring": "240 5.9% 10%"
+    },
+    "usage_rules": {
+      "primary_action": "bg-primary text-primary-foreground hover:bg-primary/90",
+      "secondary_action": "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      "ghost_action": "hover:bg-accent hover:text-accent-foreground",
+      "canvas_background": "bg-muted/30",
+      "sidebar_background": "bg-background border-r border-border"
+    }
+  },
+  "visual_enhancers": {
+    "shadows": {
+      "subtle": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      "lifted": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      "floating": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"
+    },
+    "borders": {
+      "default": "1px solid hsl(var(--border))",
+      "active": "1px solid hsl(var(--ring))",
+      "focus_ring": "ring-2 ring-ring ring-offset-2"
+    },
+    "radius": {
+      "container": "rounded-xl",
+      "button": "rounded-md",
+      "input": "rounded-md"
+    }
+  },
+  "layout_strategies": {
+    "dashboard": {
+      "type": "Bento Grid",
+      "classes": "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 p-8",
+      "card_style": "bg-card text-card-foreground border shadow-sm rounded-xl p-6 hover:shadow-md transition-shadow duration-200"
+    },
+    "builder": {
+      "type": "The Workbench",
+      "structure": "flex h-screen overflow-hidden",
+      "sidebar_left": "w-64 flex-shrink-0 border-r bg-background p-4 overflow-y-auto",
+      "canvas_area": "flex-1 bg-muted/30 relative overflow-auto flex items-center justify-center p-12",
+      "sidebar_right": "w-80 flex-shrink-0 border-l bg-background p-4 overflow-y-auto"
+    }
+  },
+  "components": {
+    "Button": {
+      "path": "/app/frontend/src/components/ui/button.jsx",
+      "style": "font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+    },
+    "Card": {
+      "path": "/app/frontend/src/components/ui/card.jsx",
+      "style": "rounded-xl border bg-card text-card-foreground shadow-sm"
+    },
+    "Input": {
+      "path": "/app/frontend/src/components/ui/input.jsx",
+      "style": "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    },
+    "PDFCanvas": {
+      "description": "The core component for rendering the PDF and overlaying fields.",
+      "tech": "react-pdf (for rendering) + absolute positioned divs (for fields)",
+      "interaction": "useDraggable (dnd-kit or react-draggable) for field placement."
+    }
+  },
+  "image_assets": {
+    "login_background": {
+      "url": "https://images.unsplash.com/photo-1615852993296-b42d4dbb5555?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "alt": "Minimalist white office desk",
+      "usage": "Full screen background for login/auth pages with a white glassmorphism card overlay."
+    },
+    "empty_state": {
+      "url": "https://images.unsplash.com/photo-1537655949728-d4e1c7c7bf90?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "alt": "Clean workspace",
+      "usage": "Displayed when no templates exist in the dashboard."
+    }
+  },
+  "motion": {
+    "transitions": {
+      "default": "all 0.2s ease-in-out",
+      "hover": "transform 0.1s ease-out",
+      "sidebar": "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+    },
+    "animations": {
+      "fade_in": "animate-in fade-in duration-300",
+      "slide_up": "animate-in slide-in-from-bottom-4 duration-300"
+    }
+  },
+  "accessibility": {
+    "rules": [
+      "Ensure 4.5:1 contrast ratio for all text.",
+      "All interactive elements must have :focus-visible styles.",
+      "Use aria-label for icon-only buttons.",
+      "All inputs must have associated labels."
+    ],
+    "testing": "All interactive elements MUST include a `data-testid` attribute (e.g., `data-testid='submit-button'`)."
+  },
+  "universal_guidelines": [
+    "DO NOT use gradients for backgrounds. Use solid colors or subtle noise textures.",
+    "Avoid 'center-everything'. Use left alignment for text to improve readability.",
+    "Use 2x more whitespace than you think is necessary.",
+    "Inputs and buttons should feel 'tactile' - use subtle borders and shadows.",
+    "Error messages should be helpful and human, not robotic (e.g., 'Please enter a valid date' instead of 'Invalid Input').",
+    "For the PDF Canvas: Ensure the 'overlay' layer exactly matches the PDF dimensions. Use CSS 'transform: scale()' to handle zoom without breaking layout."
+  ],
+  "instructions_to_main_agent": "You are building a precision tool. The 'Template Builder' is the heart of the app. Focus on the 'Drag and Drop' experience. It must feel smooth. Use 'react-draggable' or '@dnd-kit/core' for the field movement. The coordinate system is critical: (0,0) is usually bottom-left in PDF, but top-left in CSS. You MUST handle this conversion logic in the frontend. Use 'pdf-lib' for the actual PDF generation logic in the backend or frontend service layer."
+}
