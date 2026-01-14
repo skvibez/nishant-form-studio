@@ -112,6 +112,63 @@ const Dashboard = () => {
     }
   };
 
+  const handleDeleteTemplate = async () => {
+    if (!templateToDelete) return;
+    
+    try {
+      await axios.delete(`${API}/templates/${templateToDelete.id}`);
+      toast.success('Template deleted successfully');
+      setTemplates(templates.filter(t => t.id !== templateToDelete.id));
+      setDeleteDialogOpen(false);
+      setTemplateToDelete(null);
+    } catch (error) {
+      toast.error('Failed to delete template');
+    }
+  };
+
+  const handleArchiveTemplate = async (template) => {
+    try {
+      if (!template.active_version_id) {
+        toast.error('No published version to archive');
+        return;
+      }
+      
+      // Archive the active version
+      await axios.patch(`${API}/versions/${template.active_version_id}`, {
+        field_schema: [],  // Keep existing fields
+        status: 'ARCHIVED'
+      });
+      
+      toast.success('Template archived successfully');
+      fetchTemplates();
+    } catch (error) {
+      toast.error('Failed to archive template');
+    }
+  };
+
+  const handlePublishLatest = async (template) => {
+    try {
+      const versionsRes = await axios.get(`${API}/templates/${template.id}/versions`);
+      const versions = versionsRes.data;
+      
+      if (versions.length === 0) {
+        toast.error('No versions available');
+        return;
+      }
+      
+      const latestVersion = versions[0];
+      await axios.patch(`${API}/versions/${latestVersion.id}`, {
+        field_schema: latestVersion.field_schema,
+        status: 'PUBLISHED'
+      });
+      
+      toast.success('Latest version published successfully');
+      fetchTemplates();
+    } catch (error) {
+      toast.error('Failed to publish version');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
