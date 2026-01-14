@@ -65,9 +65,11 @@ class PMSFormStudioTester:
 
     def test_create_template(self):
         """Test creating a new template"""
+        # Use timestamp to ensure unique key
+        timestamp = int(datetime.now().timestamp())
         template_data = {
-            "name": "Test KYC Form",
-            "key": "test_kyc"
+            "name": f"Test KYC Form {timestamp}",
+            "key": f"test_kyc_{timestamp}"
         }
         success, response = self.run_test(
             "Create Template",
