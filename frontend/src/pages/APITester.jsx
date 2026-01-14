@@ -395,18 +395,8 @@ const APITester = () => {
                     </div>
                   </div>
 
-                  {response.pdf_data && (
+                  {response.pdf_data ? (
                     <>
-                      <Button
-                        data-testid="download-pdf-button"
-                        onClick={downloadPDF}
-                        variant="outline"
-                        className="w-full font-medium"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download PDF
-                      </Button>
-
                       <div className="border rounded-md overflow-hidden">
                         <iframe
                           src={`data:application/pdf;base64,${response.pdf_data}`}
@@ -414,7 +404,21 @@ const APITester = () => {
                           title="Generated PDF Preview"
                         />
                       </div>
+                      
+                      <Button
+                        data-testid="download-pdf-button"
+                        onClick={downloadPDF}
+                        className="w-full font-medium"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download PDF
+                      </Button>
                     </>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-muted-foreground">PDF generated but preview unavailable</p>
+                      <p className="text-xs text-muted-foreground mt-1">Use the download button above to get the file</p>
+                    </div>
                   )}
                 </div>
               ) : (
