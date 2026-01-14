@@ -1,0 +1,10 @@
+{
+  "name": "pdf-generator-service",
+  "version": "1.0.0",
+  "description": "Node.js PDF generation service using pdf-lib",
+  "main": "generator.js",
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "node-fetch": "^3.3.2"
+  }
+}
