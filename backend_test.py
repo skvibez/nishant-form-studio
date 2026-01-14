@@ -253,6 +253,7 @@ class PMSFormStudioTester:
 
     def test_generate_pdf_success(self):
         """Test successful PDF generation"""
+        # Use existing template key from database
         generate_data = {
             "template_key": "test_kyc",
             "version": "latest",
