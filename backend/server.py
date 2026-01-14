@@ -151,13 +151,27 @@ async def upload_pdf(file: UploadFile = File(...)):
     upload_dir = Path("/app/uploads")
     upload_dir.mkdir(exist_ok=True)
     
-    file_path = upload_dir / f"{datetime.now().timestamp()}_{file.filename}"
+    filename = f"{datetime.now().timestamp()}_{file.filename}"
+    file_path = upload_dir / filename
     
     contents = await file.read()
     with open(file_path, 'wb') as f:
         f.write(contents)
     
-    return {"file_url": str(file_path), "filename": file.filename}
+    # Return relative URL that frontend can use
+    return {"file_url": f"/api/files/{filename}", "filename": file.filename}
+
+# Serve uploaded files
+@api_router.get("/files/{filename}")
+async def get_file(filename: str):
+    file_path = Path("/app/uploads") / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    with open(file_path, 'rb') as f:
+        content = f.read()
+    
+    return Response(content=content, media_type="application/pdf")
 
 # PDF Generation
 @api_router.post("/generate", response_model=GenerateResponse)
