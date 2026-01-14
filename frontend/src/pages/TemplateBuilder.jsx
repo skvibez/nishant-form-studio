@@ -5,7 +5,7 @@ import { API } from '../App';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { DndContext, useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { Resizable } from 'react-resizable-box';
+import ResizableBox from 'react-resizable-box';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
