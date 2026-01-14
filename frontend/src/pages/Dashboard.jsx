@@ -7,10 +7,12 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../components/ui/alert-dialog';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
-import { FileText, Plus, Upload, Settings, TestTube } from 'lucide-react';
+import { FileText, Plus, Upload, Settings, TestTube, MoreVertical, Archive, Trash, FileUp } from 'lucide-react';
 
 const Dashboard = () => {
   const [templates, setTemplates] = useState([]);
