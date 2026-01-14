@@ -213,9 +213,44 @@ const APITester = () => {
       } else {
         toast.error(detail || 'Failed to generate PDF');
       }
+      setResponse(null);
     } finally {
       setLoading(false);
     }
+  };
+
+  const copyCurl = () => {
+    // Remove comments from payload
+    const cleanJson = payload.split('\n').map(line => {
+      const commentIndex = line.indexOf('//');
+      return commentIndex > 0 ? line.substring(0, commentIndex).trim() : line;
+    }).join('\n');
+
+    let parsedPayload;
+    try {
+      parsedPayload = JSON.parse(cleanJson);
+    } catch (e) {
+      toast.error('Invalid JSON - fix syntax before copying cURL');
+      return;
+    }
+
+    const curlCommand = `curl -X POST "${window.location.origin}/api/generate" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+  "template_key": "${selectedTemplate}",
+  "version": "latest",
+  "payload": ${JSON.stringify(parsedPayload, null, 2).replace(/\n/g, '\n    ')},
+  "options": {
+    "flatten": true,
+    "output": "base64"
+  }
+}'`;
+
+    navigator.clipboard.writeText(curlCommand).then(() => {
+      toast.success('cURL command copied to clipboard');
+    }).catch(() => {
+      toast.error('Failed to copy to clipboard');
+    });
   };
 
   const downloadPDF = () => {
