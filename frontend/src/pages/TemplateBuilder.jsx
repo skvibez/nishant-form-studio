@@ -204,6 +204,42 @@ const TemplateBuilder = () => {
               Text Field
             </Button>
             <Button
+              data-testid="add-textarea-field"
+              onClick={() => addField('TEXTAREA')}
+              variant="outline"
+              className="w-full justify-start font-medium"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Text Area
+            </Button>
+            <Button
+              data-testid="add-number-field"
+              onClick={() => addField('NUMBER')}
+              variant="outline"
+              className="w-full justify-start font-medium"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Number
+            </Button>
+            <Button
+              data-testid="add-email-field"
+              onClick={() => addField('EMAIL')}
+              variant="outline"
+              className="w-full justify-start font-medium"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Email
+            </Button>
+            <Button
+              data-testid="add-phone-field"
+              onClick={() => addField('PHONE')}
+              variant="outline"
+              className="w-full justify-start font-medium"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Phone
+            </Button>
+            <Button
               data-testid="add-checkbox-field"
               onClick={() => addField('CHECKBOX')}
               variant="outline"
@@ -213,13 +249,31 @@ const TemplateBuilder = () => {
               Checkbox
             </Button>
             <Button
+              data-testid="add-radio-field"
+              onClick={() => addField('RADIO')}
+              variant="outline"
+              className="w-full justify-start font-medium"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Radio Button
+            </Button>
+            <Button
               data-testid="add-date-field"
               onClick={() => addField('DATE')}
               variant="outline"
               className="w-full justify-start font-medium"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Date Field
+              Date
+            </Button>
+            <Button
+              data-testid="add-signature-field"
+              onClick={() => addField('SIGNATURE')}
+              variant="outline"
+              className="w-full justify-start font-medium"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Signature
             </Button>
           </div>
         </div>
