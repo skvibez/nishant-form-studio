@@ -403,8 +403,14 @@ const TemplateBuilder = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="TEXT">Text</SelectItem>
+                  <SelectItem value="TEXTAREA">Text Area</SelectItem>
+                  <SelectItem value="NUMBER">Number</SelectItem>
+                  <SelectItem value="EMAIL">Email</SelectItem>
+                  <SelectItem value="PHONE">Phone</SelectItem>
                   <SelectItem value="CHECKBOX">Checkbox</SelectItem>
+                  <SelectItem value="RADIO">Radio Button</SelectItem>
                   <SelectItem value="DATE">Date</SelectItem>
+                  <SelectItem value="SIGNATURE">Signature</SelectItem>
                   <SelectItem value="SIGNATURE_ANCHOR">Signature Anchor</SelectItem>
                 </SelectContent>
               </Select>
