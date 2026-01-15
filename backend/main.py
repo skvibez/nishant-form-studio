@@ -29,6 +29,10 @@ async def startup():
     await init_db()
     logging.info("Database initialized")
 
+@app.get("/")
+async def health_check():
+    return {"status": "healthy"}
+
 # Template Management
 @api_router.post("/templates", response_model=TemplateResponse)
 async def create_template(template: TemplateCreate, db: AsyncSession = Depends(get_db)):
